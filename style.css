@@ -178,6 +178,9 @@ h1 {
     display: inline-flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     min-width: 172px;
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, .28);
@@ -189,9 +192,34 @@ h1 {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     box-shadow: 0 12px 40px rgba(0, 0, 0, .24);
-    transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+    transition: transform .25s ease, background .25s ease, box-shadow .25s ease, color .25s ease;
     animation: reveal 1s .8s both;
+}
+
+#celebrate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(246, 200, 117, .65) 0, rgba(170, 160, 255, .28) 35%, transparent 70%);
+    transform: scale(.2);
+    opacity: 0;
+}
+
+#celebrate.is-celebrating {
+    color: #5d477f;
+    background: #fff4c7;
+    box-shadow: 0 16px 50px rgba(246, 200, 117, .32);
+    transform: translateY(-2px) scale(.98);
+}
+
+#celebrate.is-celebrating::after {
+    animation: buttonPulse .55s ease-out;
 }
 
 #celebrate span {
@@ -211,6 +239,17 @@ h1 {
 
 #celebrate:active {
     transform: translateY(0) scale(.96);
+}
+
+@keyframes buttonPulse {
+    0% {
+        transform: scale(.2);
+        opacity: .9;
+    }
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
 }
 
 @keyframes reveal {

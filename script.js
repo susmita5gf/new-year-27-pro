@@ -2,6 +2,7 @@ const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
 const button = document.getElementById("celebrate");
 const message = document.getElementById("message");
+const buttonLabel = button.querySelector(".button-label");
 
 let width = 0;
 let height = 0;
@@ -39,8 +40,29 @@ function burst(x, y, amount = 70) {
       life: 1,
       decay: Math.random() * .012 + .008,
       size: Math.random() * 2.6 + 1,
-      color: palette[Math.floor(Math.random() * palette.length)]
+      color: palette[Math.floor(Math.random() * palette.length)],
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - .5) * .18,
+      shape: Math.random() > .48 ? "confetti" : "dot"
     });
+  }
+}
+
+function partyBurst() {
+  const rect = button.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  burst(x, y, 150);
+
+  for (let i = 0; i < 5; i++) {
+    window.setTimeout(() => {
+      burst(
+        width * (.12 + Math.random() * .76),
+        height * (.18 + Math.random() * .38),
+        90
+      );
+    }, i * 130);
   }
 }
 
@@ -63,13 +85,22 @@ function animate() {
     particle.y += particle.vy;
     particle.vy += particle.gravity;
     particle.vx *= .992;
+    particle.rotation += particle.rotationSpeed;
     particle.life -= particle.decay;
 
     ctx.globalAlpha = particle.life;
     ctx.fillStyle = particle.color;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.save();
+    ctx.translate(particle.x, particle.y);
+    ctx.rotate(particle.rotation);
+    if (particle.shape === "confetti") {
+      ctx.fillRect(-particle.size * 1.8, -particle.size * .7, particle.size * 3.6, particle.size * 1.4);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
   });
 
   ctx.globalAlpha = 1;
@@ -95,15 +126,30 @@ function typeMessage() {
 
 window.setTimeout(typeMessage, 900);
 
-button.addEventListener("click", () => {
-  for (let i = 0; i < 7; i++) {
-    window.setTimeout(() => {
-      burst(
-        width * (.18 + Math.random() * .64),
-        height * (.18 + Math.random() * .42),
-        65
-      );
-    }, i * 120);
+let celebrationTimeout;
+
+function celebrate() {
+  window.clearTimeout(celebrationTimeout);
+  button.classList.remove("is-celebrating");
+  void button.offsetWidth;
+  button.classList.add("is-celebrating");
+  buttonLabel.textContent = "Celebrating!";
+  partyBurst();
+
+  celebrationTimeout = window.setTimeout(() => {
+    button.classList.remove("is-celebrating");
+    buttonLabel.textContent = "Celebrate again";
+  }, 1000);
+}
+
+button.addEventListener("pointerdown", event => {
+  event.preventDefault();
+  celebrate();
+});
+
+button.addEventListener("click", event => {
+  if (event.detail === 0) {
+    celebrate();
   }
 });
 
