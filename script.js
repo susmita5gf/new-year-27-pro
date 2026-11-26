@@ -2,7 +2,6 @@ const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
 const button = document.getElementById("celebrate");
 const message = document.getElementById("message");
-const buttonLabel = button.querySelector(".button-label");
 
 let width = 0;
 let height = 0;
@@ -70,8 +69,7 @@ function animate() {
   ctx.clearRect(0, 0, width, height);
 
   stars.forEach((star, index) => {
-    star.alpha += Math.sin(Date.now() * star.speed + index) * .003;
-    ctx.globalAlpha = Math.max(.08, Math.min(.8, star.alpha));
+    ctx.globalAlpha = .15 + (Math.sin(Date.now() * star.speed + index) + 1) * .28;
     ctx.fillStyle = "#fff";
     ctx.beginPath();
     ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
@@ -133,28 +131,11 @@ function celebrate() {
   button.classList.remove("is-celebrating");
   void button.offsetWidth;
   button.classList.add("is-celebrating");
-  buttonLabel.textContent = "Celebrating!";
   partyBurst();
 
   celebrationTimeout = window.setTimeout(() => {
     button.classList.remove("is-celebrating");
-    buttonLabel.textContent = "Celebrate again";
   }, 1000);
 }
 
-button.addEventListener("pointerdown", event => {
-  event.preventDefault();
-  celebrate();
-});
-
-button.addEventListener("click", event => {
-  if (event.detail === 0) {
-    celebrate();
-  }
-});
-
-window.addEventListener("pointerdown", event => {
-  if (event.target !== button && !button.contains(event.target)) {
-    burst(event.clientX, event.clientY, 38);
-  }
-});
+button.addEventListener("click", celebrate);
